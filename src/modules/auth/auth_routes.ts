@@ -85,10 +85,25 @@ router.post("/auth/register", registerCtrl);
  *     responses:
  *       200:
  *         description: Inicio de sesión exitoso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: object
+ *                   description: Información del usuario
+ *                 token:
+ *                   type: string
+ *                   description: Token JWT generado
+ *                 email:
+ *                   type: string
+ *                   description: Correo electrónico del usuario
  *       400:
  *         description: Error en la solicitud
  */
 router.post("/auth/login", loginCtrl);
+
 /**
  * @swagger
  * /api/auth/google:
@@ -99,7 +114,7 @@ router.post("/auth/login", loginCtrl);
  *       302:
  *         description: Redirección a Google para autenticación
  */
-router.get('/auth/google',googleAuthCtrl );
+router.get('/auth/google', googleAuthCtrl);
 
 /**
  * @swagger
@@ -109,7 +124,18 @@ router.get('/auth/google',googleAuthCtrl );
  *     tags: [Auth]
  *     responses:
  *       200:
- *         description: Autenticación exitosa, redirige al frontend con el token
+ *         description: Autenticación exitosa, redirige al frontend con el token y el email
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                   description: Token JWT generado
+ *                 email:
+ *                   type: string
+ *                   description: Correo electrónico del usuario autenticado
  *       400:
  *         description: Error en la autenticación
  */

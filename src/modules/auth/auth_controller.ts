@@ -15,7 +15,7 @@ const registerCtrl = async ({body}: Request, res: Response) => {
 const loginCtrl = async ({ body }: Request, res: Response) => {
     try {
         const { name, email, password } = body;
-        const responseUser = await loginUser({name, email, password });
+        const responseUser = await loginUser({ name, email, password });
 
         if (responseUser === 'INCORRECT_PASSWORD') {
             return res.status(403).json({ message: 'Contraseña incorrecta' });
@@ -25,7 +25,22 @@ const loginCtrl = async ({ body }: Request, res: Response) => {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
-        return res.json(responseUser);
+        // Añadir el email al token y la respuesta
+        res.cookie('token', responseUser.token, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'none',
+            maxAge: 86400000, // 1 día
+        });
+
+        res.cookie('refreshToken', responseUser.refreshToken, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'none',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+        });
+
+        return res.json({ user: responseUser.user, token: responseUser.token, email: responseUser.user.email });
     } catch (error: any) {
         return res.status(500).json({ message: error.message });
     }
@@ -52,30 +67,38 @@ const googleAuthCtrl = async(req: Request, res: Response) =>{
     res.redirect(fullUrl);
 }
 
+
+
 const googleAuthCallback = async (req: Request, res: Response) => {
     try {
         const code = req.query.code as string;
-        
+
         if (!code) {
             return res.status(400).json({ message: 'Código de autorización faltante' });
         }
 
         const authData = await googleAuth(code);
-        
+
         if (!authData) {
             return res.redirect('/login?error=authentication_failed');
         }
-        
-        console.log(authData.token)
-        // Configurar cookies no https (secure)--> acces des del web.
+
+        // Añadir el email al token y la respuesta
         res.cookie('token', authData.token, {
             httpOnly: true,
-            secure: false, 
+            secure: false,
             sameSite: 'none',
-            maxAge: 86400000 // 1 día
-        });  
-        console.log(authData.token);
-        res.redirect(`http://localhost:4200/?token=${authData.token}`);   
+            maxAge: 86400000, // 1 día
+        });
+
+        res.cookie('refreshToken', authData.refreshToken, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'none',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+        });
+
+        res.redirect(`http://localhost:4200/?token=${authData.token}&email=${authData.user.email}`);
     } catch (error: any) {
         console.error('Error en callback de Google:', error);
         res.redirect('/login?error=server_error');
