@@ -40,8 +40,11 @@ const loginCtrl = async ({ body }: Request, res: Response) => {
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
         });
 
-        return res.json({ user: responseUser.user, token: responseUser.token, email: responseUser.user.email });
-    } catch (error: any) {
+        return res.json({
+            user: responseUser.user,
+            token: responseUser.token,
+            refreshToken: responseUser.refreshToken,
+        });    } catch (error: any) {
         return res.status(500).json({ message: error.message });
     }
 };

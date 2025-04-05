@@ -81,6 +81,7 @@ app.use(loggingHandler);
 app.use(corsHandler);
 
 // Rutas
+
 app.use('/api', userRoutes);
 app.use('/api', forumRoutes);
 app.use('/api', subjectRoutes);
